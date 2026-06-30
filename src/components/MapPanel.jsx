@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
-import { useLeaflet } from "../../hooks/useLeaflet";
-import "../../styles/MapPanel.css";
+import { useLeaflet } from "../hooks/useLeaflet";
+import "../styles/MapPanel.css";
 
 export function MapPanel({ onAreaSelected, onAreaCleared, results, loadedFeature }) {
   const mapRef = useRef(null);

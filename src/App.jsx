@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { MapPanel } from "./components/MapPanel/MapPanel";
-import { UploadModal } from "./components/UploadModal/UploadModal";
-import { SearchPanel } from "./components/SearchPanel/SearchPanel";
+import { MapPanel } from "./components/MapPanel";
+import { UploadModal } from "./components/UploadModal";
+import { SearchPanel } from "./components/SearchPanel";
 import "./styles/index.css";
 
 export default function App() {

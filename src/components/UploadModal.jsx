@@ -1,5 +1,5 @@
 import { useState } from "react";
-import "../../styles/UploadModal.css";
+import "../styles/UploadModal.css";
 
 export function UploadModal({ onClose }) {
   const [sourceType, setSourceType] = useState("file");

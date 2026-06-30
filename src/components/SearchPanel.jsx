@@ -1,4 +1,4 @@
-import "../../styles/SearchPanel.css";
+import "../styles/SearchPanel.css";
 
 export function SearchPanel({
   selectedArea,
