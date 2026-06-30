@@ -1,6 +1,8 @@
 import { useState } from "react";
 import "../styles/UploadModal.css";
 
+const API_BASE_URL = "http://130.192.238.11:8008";
+
 export function UploadModal({ onClose }) {
   const [sourceType, setSourceType] = useState("file");
   const [file, setFile] = useState(null);
@@ -59,30 +61,58 @@ export function UploadModal({ onClose }) {
     if (!name) return alert("Name is required.");
 
     const payload = {
-      name,
-      tags: tags.split(",").map((t) => t.trim()),
-      desc,
-      sourceType,
-      ogcUrl,
-      ogcType,
-      isSpatial,
-      geomType,
-      crs,
-      bbox,
+      registry: {
+        name,
+        description: desc,
+        tags: tags.split(",").map((t) => t.trim()).filter(Boolean),
+        crs,
+        temporal_start: null,
+        temporal_end: null,
+      },
+      source: {
+        type: sourceType,
+        filename: file?.name || null,
+        format: file?.name?.split(".").pop() || null,
+        ogc_url: sourceType === "ogc" ? ogcUrl : null,
+        ogc_type: sourceType === "ogc" ? ogcType : null,
+      },
+      spatial_footprint: isSpatial
+        ? {
+            type: "Polygon",
+            coordinates: [[
+              [Number(bbox.xmin), Number(bbox.ymin)],
+              [Number(bbox.xmax), Number(bbox.ymin)],
+              [Number(bbox.xmax), Number(bbox.ymax)],
+              [Number(bbox.xmin), Number(bbox.ymax)],
+              [Number(bbox.xmin), Number(bbox.ymin)],
+            ]],
+          }
+        : null,
+      datasource_class: {
+        is_spatial: isSpatial,
+        data_class: "vector",
+        format: file?.name?.split(".").pop() || "GeoJSON",
+      },
+      manifest: {},
+      features: [],
     };
 
     try {
-      await fetch("http://localhost:8000/upload", {
+      const res = await fetch(`${API_BASE_URL}/api/v1/datasources`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
+
+      if (!res.ok) {
+        throw new Error(`Upload request failed: ${res.status}`);
+      }
+
       alert("Dataset Registered!");
       onClose();
     } catch (e) {
-      console.log("Mock upload successful (Backend offline).");
-      alert("Dataset Registered (Mock)!");
-      onClose();
+      console.error("Upload request failed", e);
+      alert("Dataset registration failed. Please try again.");
     }
   };
 

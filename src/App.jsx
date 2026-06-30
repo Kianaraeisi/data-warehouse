@@ -4,6 +4,44 @@ import { UploadModal } from "./components/UploadModal";
 import { SearchPanel } from "./components/SearchPanel";
 import "./styles/index.css";
 
+const API_BASE_URL = "http://130.192.238.11:8008";
+
+function normalizeDatasource(item) {
+  let geometry = null;
+  let footprint = null;
+
+  if (item.spatial_footprint) {
+    try {
+      const parsed = typeof item.spatial_footprint === "string"
+        ? JSON.parse(item.spatial_footprint)
+        : item.spatial_footprint;
+
+      geometry = parsed;
+      if (parsed?.type === "Polygon" && Array.isArray(parsed.coordinates)) {
+        footprint = parsed.coordinates[0]?.map(([lng, lat]) => [lat, lng]) || [];
+      }
+    } catch (err) {
+      console.warn("Unable to parse spatial footprint", err);
+    }
+  }
+
+  return {
+    id: item.id,
+    name: item.name,
+    date: item.temporal_start || item.uploaded_at?.split("T")[0] || "",
+    geometry,
+    footprint,
+    properties: {
+      description: item.description,
+      tags: item.tags || [],
+      sourceType: item.source_type,
+      location: item.location,
+      crs: item.crs,
+      uploadedAt: item.uploaded_at,
+    },
+  };
+}
+
 export default function App() {
   const [selectedArea, setSelectedArea] = useState(null);
   const [dateFrom, setDateFrom] = useState("");
@@ -16,7 +54,7 @@ export default function App() {
 
   const handleSearch = async () => {
     const payload = {
-      polygon: selectedArea?.geojson || null,
+      polygon: selectedArea?.geojson?.geometry || null,
       datarange: {
         from: dateFrom || "all",
         to: dateTo || "all",
@@ -29,46 +67,42 @@ export default function App() {
 
     setSearching(true);
     setLoadedFeature(null);
+try {
+      const query = new URLSearchParams();
 
-    try {
-      const res = await fetch("http://localhost:8000/search", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+      if (payload.tags?.length) {
+        query.set("tags", payload.tags.join(","));
+      }
+      if (payload.datarange?.from && payload.datarange.from !== "all") {
+        query.set("temporal_start", payload.datarange.from);
+      }
+      if (payload.datarange?.to && payload.datarange.to !== "all") {
+        query.set("temporal_end", payload.datarange.to);
+      }
+      if (payload.polygon) {
+        query.set("footprint_intersects", JSON.stringify(payload.polygon));
+      }
+
+      let endpoint = `${API_BASE_URL}/api/v1/datasources`;
+      if (query.toString()) {
+        endpoint = `${endpoint}?${query.toString()}`;
+      }
+
+      const res = await fetch(endpoint, { method: "GET", headers: { "Content-Type": "application/json" } });
+
+      if (!res.ok) {
+        throw new Error(`Search request failed: ${res.status}`);
+      }
+
       const data = await res.json();
-      setResults(data);
+      const list = Array.isArray(data?.results) ? data.results : Array.isArray(data) ? data : [];
+      setResults(list.map(normalizeDatasource));
     } catch (err) {
-      console.warn("Backend not running at :8000. Using mock data.");
-      setTimeout(() => {
-        const mock = Array.from({ length: 4 }, (_, i) => ({
-          id: `DS_${i}`,
-          name: `Dataset_Turin_${i}`,
-          date: "2024-01-01",
-          geometry: {
-            type: "Polygon",
-            coordinates: [
-              [
-                [7.6, 45.0],
-                [7.7, 45.0],
-                [7.7, 45.1],
-                [7.6, 45.1],
-                [7.6, 45.0],
-              ],
-            ],
-          },
-          properties: {
-            resolution: "10m",
-            cloudCover: "5%",
-            source: "Sentinel-2",
-          },
-        }));
-        setResults(mock);
-        setSearching(false);
-      }, 1000);
-      return;
+      console.error("Search request failed", err);
+      setResults([]);
+    } finally {
+      setSearching(false);
     }
-    setSearching(false);
   };
 
   return (
