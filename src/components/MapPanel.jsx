@@ -113,22 +113,37 @@ export function MapPanel({ onAreaSelected, onAreaCleared, results, loadedFeature
 
     loadedFeatureLayerRef.current.clearLayers();
 
-    if (loadedFeature && loadedFeature.geometry) {
-      const geojsonLayer = L.geoJSON(loadedFeature.geometry, {
-        style: { color: "#4f9cf9", weight: 3, fillOpacity: 0.3 },
-      }).addTo(loadedFeatureLayerRef.current);
+    if (loadedFeature?.features?.length) {
+      loadedFeature.features.forEach((f) => {
+        let geometry = f.geometry;
+        if (typeof geometry === "string") {
+          try {
+            geometry = JSON.parse(geometry);
+          } catch (err) {
+            console.warn("Unable to parse feature geometry", err);
+            return;
+          }
+        }
+        if (!geometry) return;
 
-      if (loadedFeature.properties) {
-        let popupContent = "<b>Properties:</b><br>";
-        Object.entries(loadedFeature.properties).forEach(([k, v]) => {
-          popupContent += `${k}: ${v}<br>`;
-        });
-        geojsonLayer.bindPopup(popupContent).openPopup();
+        const layer = L.geoJSON(geometry, {
+          style: { color: "#4f9cf9", weight: 2, fillOpacity: 0.25 },
+        }).addTo(loadedFeatureLayerRef.current);
+
+        if (f.attributes) {
+          let popupContent = "<b>Properties:</b><br>";
+          Object.entries(f.attributes).forEach(([k, v]) => {
+            popupContent += `${k}: ${v}<br>`;
+          });
+          layer.bindPopup(popupContent);
+        }
+      });
+
+      const bounds = loadedFeatureLayerRef.current.getBounds();
+      if (bounds.isValid()) {
+        mapInstanceRef.current.fitBounds(bounds);
       }
-
-      mapInstanceRef.current.fitBounds(geojsonLayer.getBounds());
     }
   }, [loadedFeature, leafletReady]);
-
   return <div ref={mapRef} className="map-container" />;
 }
