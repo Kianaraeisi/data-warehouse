@@ -8,7 +8,6 @@ export function AOIFilter({ selectedArea, onAreaCleared }) {
         </div>
         <span className={`status-dot ${selectedArea ? "status-dot-active" : ""}`} />
       </div>
-
       {selectedArea ? (
         <div className="aoi-selected-card">
           <div className="aoi-status-row">
@@ -18,21 +17,19 @@ export function AOIFilter({ selectedArea, onAreaCleared }) {
             </div>
             <span className="status-badge">Ready</span>
           </div>
-
           {selectedArea.coordinates?.length > 0 && (
             <details className="aoi-details">
               <summary>View {selectedArea.coordinates.length} coordinates</summary>
               <div className="aoi-coords">
-                {selectedArea.coordinates.map((coord, idx) => (
-                  <div key={idx} className="coord-item">
-                    <span className="coord-index">{idx + 1}</span>
-                    <span>{coord.lat}°, {coord.lng}°</span>
+                {selectedArea.coordinates.map((coordinate, index) => (
+                  <div key={index} className="coord-item">
+                    <span className="coord-index">{index + 1}</span>
+                    <span>{coordinate.lat}°, {coordinate.lng}°</span>
                   </div>
                 ))}
               </div>
             </details>
           )}
-
           <button className="btn-ghost clear-area-button" onClick={onAreaCleared}>
             Clear selected area
           </button>

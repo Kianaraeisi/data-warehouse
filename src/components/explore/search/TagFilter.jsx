@@ -7,7 +7,6 @@ export function TagFilter({ tags, onChange }) {
           <div className="section-title">Tags</div>
         </div>
       </div>
-
       <label className="field-group">
         <span>Keywords</span>
         <input

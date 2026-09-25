@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { MapPanel } from "./components/MapPanel";
-import { UploadModal } from "./components/UploadModal";
-import { SearchPanel } from "./components/SearchPanel";
+import { MapPanel } from "./components/explore/MapPanel";
+import UploadPage from "./components/upload/UploadPage";
+import { SearchPanel } from "./components/explore/SearchPanel";
 import { useDatasetSearch } from "./hooks/useDatasetSearch";
 import { useDatasetFeatures } from "./hooks/useDatasetFeatures";
 import "./styles/index.css";
@@ -19,29 +19,34 @@ export default function App() {
   };
 
   return (
-    <div className="main-layout">
-      {uploadOpen && <UploadModal onClose={() => setUploadOpen(false)} />}
-
-      <SearchPanel
-        selectedArea={selectedArea}
-        onAreaCleared={() => setSelectedArea(null)}
-        filters={searchState.filters}
-        onFilterChange={searchState.updateFilter}
-        onSearch={handleSearch}
-        searching={searchState.searching}
-        results={searchState.results}
-        onResultLoad={featureState.loadResult}
-        onUploadClick={() => setUploadOpen(true)}
-      />
-
-      <main className="main-content">
-        <MapPanel
-          onAreaSelected={setSelectedArea}
+  <>
+    {uploadOpen ? (
+      <UploadPage onBack={() => setUploadOpen(false)} />
+    ) : (
+      <div className="main-layout">
+        <SearchPanel
+          selectedArea={selectedArea}
           onAreaCleared={() => setSelectedArea(null)}
+          filters={searchState.filters}
+          onFilterChange={searchState.updateFilter}
+          onSearch={handleSearch}
+          searching={searchState.searching}
+          searchError={searchState.error}
           results={searchState.results}
-          loadedFeature={featureState.loadedFeature}
+          onResultLoad={featureState.loadResult}
+          onUploadClick={() => setUploadOpen(true)}
         />
-      </main>
-    </div>
-  );
+
+        <main className="main-content">
+          <MapPanel
+            onAreaSelected={setSelectedArea}
+            onAreaCleared={() => setSelectedArea(null)}
+            results={searchState.results}
+            loadedFeature={featureState.loadedFeature}
+          />
+        </main>
+      </div>
+    )}
+  </>
+);
 }

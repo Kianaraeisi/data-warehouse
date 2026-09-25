@@ -1,4 +1,4 @@
-const API_BASE_URL = "http://130.192.238.11:8008";
+import { API_BASE_URL } from "../config/api";
 
 export function normalizeDatasource(item) {
   let geometry = null;
@@ -37,7 +37,7 @@ export function normalizeDatasource(item) {
   };
 }
 
-export async function searchDatasources({ selectedArea, filters }) {
+export async function searchDatasources({ selectedArea, filters, signal }) {
   const query = new URLSearchParams();
   const parsedTags = filters.tags
     .split(",")
@@ -55,6 +55,7 @@ export async function searchDatasources({ selectedArea, filters }) {
   const response = await fetch(`${API_BASE_URL}/api/v1/datasources${suffix}`, {
     method: "GET",
     headers: { "Content-Type": "application/json" },
+    signal,
   });
 
   if (!response.ok) {
@@ -71,9 +72,10 @@ export async function searchDatasources({ selectedArea, filters }) {
   return list.map(normalizeDatasource);
 }
 
-export async function loadDatasourceFeatures(result) {
+export async function loadDatasourceFeatures(result, signal) {
   const response = await fetch(
-    `${API_BASE_URL}/api/v1/datasources/${result.id}/features`
+    `${API_BASE_URL}/api/v1/datasources/${result.id}/features`,
+    { signal }
   );
 
   if (!response.ok) {

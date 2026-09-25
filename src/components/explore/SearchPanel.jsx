@@ -2,7 +2,7 @@ import { SidebarHeader } from "./search/SidebarHeader";
 import { SearchFilters } from "./search/SearchFilters";
 import { SearchResults } from "./search/SearchResults";
 import { SidebarFooter } from "./search/SidebarFooter";
-import "../styles/SearchPanel.css";
+import "../../styles/SearchPanel.css";
 
 export function SearchPanel({
   selectedArea,
@@ -11,6 +11,7 @@ export function SearchPanel({
   onFilterChange,
   onSearch,
   searching,
+  searchError,
   results,
   onResultLoad,
   onUploadClick,
@@ -26,7 +27,11 @@ export function SearchPanel({
         onSearch={onSearch}
         searching={searching}
       />
-      <SearchResults results={results} onResultLoad={onResultLoad} />
+      <SearchResults
+        results={results}
+        error={searchError}
+        onResultLoad={onResultLoad}
+      />
       <SidebarFooter />
     </aside>
   );

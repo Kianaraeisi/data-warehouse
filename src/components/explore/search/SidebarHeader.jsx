@@ -8,7 +8,6 @@ export function SidebarHeader({ onUploadClick }) {
           <h1>Dataset Explorer</h1>
         </div>
       </div>
-
       <button onClick={onUploadClick} className="btn-primary upload-trigger">
         <span className="upload-trigger-icon">＋</span>
         Upload

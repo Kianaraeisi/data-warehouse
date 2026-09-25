@@ -19,7 +19,6 @@ export function SearchFilters({
         </div>
         <span className="filters-count">3 filters</span>
       </div>
-
       <AOIFilter selectedArea={selectedArea} onAreaCleared={onAreaCleared} />
       <DateFilter
         dateFrom={filters.dateFrom}
@@ -27,13 +26,12 @@ export function SearchFilters({
         onChange={onFilterChange}
       />
       <TagFilter tags={filters.tags} onChange={onFilterChange} />
-
       <button
         className="btn-primary search-button"
         onClick={onSearch}
         disabled={searching}
       >
-        <span>{searching ? "Searching…" : "Search datasets"}</span>
+        <span>{searching ? "Searching..." : "Search datasets"}</span>
         <span aria-hidden="true">→</span>
       </button>
     </div>
