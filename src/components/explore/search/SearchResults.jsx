@@ -1,6 +1,6 @@
 import { DatasetCard } from "./DatasetCard";
 
-export function SearchResults({ results, error, onResultLoad }) {
+export function SearchResults({ results, error, searching, onResultLoad }) {
   const count = Array.isArray(results) ? results.length : 0;
 
   return (
@@ -17,6 +17,12 @@ export function SearchResults({ results, error, onResultLoad }) {
         <div className="results-empty" role="alert">
           <strong>Unable to load datasets</strong>
           <span>{error}</span>
+        </div>
+      ) : searching ? (
+        <div className="results-empty" role="status" aria-live="polite">
+          <div className="empty-state-icon" aria-hidden="true">...</div>
+          <strong>Searching catalog</strong>
+          <span>Checking datasets against the selected filters.</span>
         </div>
       ) : results === null ? (
         <div className="results-empty">

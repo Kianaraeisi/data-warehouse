@@ -5,7 +5,7 @@ export function SidebarHeader({ onUploadClick }) {
         <div className="brand-mark">EC</div>
         <div>
           <div className="brand-eyebrow">Spatial Data Warehouse</div>
-          <h1>Dataset Explorer</h1>
+          <h1>Data Warehouse Explorer</h1>
         </div>
       </div>
       <button onClick={onUploadClick} className="btn-primary upload-trigger">

@@ -27,9 +27,11 @@ export function SearchFilters({
       />
       <TagFilter tags={filters.tags} onChange={onFilterChange} />
       <button
+        type="button"
         className="btn-primary search-button"
         onClick={onSearch}
         disabled={searching}
+        aria-busy={searching}
       >
         <span>{searching ? "Searching..." : "Search datasets"}</span>
         <span aria-hidden="true">→</span>

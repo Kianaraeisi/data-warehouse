@@ -30,6 +30,7 @@ export function SearchPanel({
       <SearchResults
         results={results}
         error={searchError}
+        searching={searching}
         onResultLoad={onResultLoad}
       />
       <SidebarFooter />
