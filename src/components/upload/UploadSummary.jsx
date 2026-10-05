@@ -15,7 +15,7 @@ export function UploadSummary({ form, onSubmit }) {
         type="button"
         className="register-button"
         onClick={onSubmit}
-        disabled={form.submitting}
+        disabled={form.submitting || !form.hasRequiredSourceInfo}
       >
         {form.submitting ? "Registering..." : "Register Dataset"}
       </button>

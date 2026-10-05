@@ -30,7 +30,11 @@ export function ColumnMappingSection({ form }) {
       </select>
 
       <label>JSONB Attributes</label>
-      <div className="mapping-box">Detected non-spatial columns will appear here.</div>
+      <div className="mapping-box mapping-columns">
+        {form.detectedColumns.length > 0
+          ? form.detectedColumns.map((column) => <span key={column}>{column}</span>)
+          : "Detected non-spatial columns will appear here."}
+      </div>
 
       <label>Drop Columns</label>
       <div className="mapping-box">Select columns to exclude.</div>
