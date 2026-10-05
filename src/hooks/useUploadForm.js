@@ -71,47 +71,7 @@ export function useUploadForm(onSuccess) {
     }
   };
 
-  const getSourceValidationError = () => {
-    if (sourceType === "file" && !file) {
-      return "Select a file before continuing.";
-    }
-    if (sourceType === "file" && !dataFormat) {
-      return "Select a format before continuing.";
-    }
-    if (sourceType === "ogc" && !ogcUrl.trim()) {
-      return "Enter an OGC URL before continuing.";
-    }
-    return null;
-  };
-
-  const hasRequiredSourceInfo = !getSourceValidationError();
-
-  const validateStep = (step) => {
-    if (step === 0) {
-      const sourceError = getSourceValidationError();
-      if (sourceError) {
-        setError(sourceError);
-        return false;
-      }
-    }
-
-    if (step === 1 && !name.trim()) {
-      setError("Name is required.");
-      return false;
-    }
-
-    setError(null);
-    return true;
-  };
-
   const submit = async () => {
-    const sourceError = getSourceValidationError();
-    if (sourceError) {
-      const validationError = new Error(sourceError);
-      setError(validationError.message);
-      throw validationError;
-    }
-
     if (!name.trim()) {
       const validationError = new Error("Name is required.");
       setError(validationError.message);
@@ -187,8 +147,6 @@ export function useUploadForm(onSuccess) {
     setTemporalEnd,
     submitting,
     error,
-    hasRequiredSourceInfo,
-    validateStep,
     profileFile,
     submit,
   };
