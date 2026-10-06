@@ -37,8 +37,6 @@ export function useLeaflet(onReady) {
 
     return () => {
       cancelled = true;
-      css1.remove();
-      css2.remove();
       js1.remove();
     };
   }, []);
