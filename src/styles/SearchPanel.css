@@ -417,6 +417,39 @@
   gap: 9px;
 }
 
+.results-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.search-panel .results-toolbar button {
+  min-height: 32px;
+  padding: 6px 9px;
+  border: 1px solid #3a4d66;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.search-panel .results-select-all {
+  background: transparent;
+  color: #cbd7e5;
+}
+
+.search-panel .results-download-selected {
+  border-color: #3979c9;
+  background: #245894;
+  color: #fff;
+}
+
+.search-panel .results-toolbar button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
 .result-item {
   min-width: 0;
   padding: 12px;
@@ -444,9 +477,42 @@
   text-transform: uppercase;
 }
 
+.dataset-select {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.dataset-select input {
+  width: 15px;
+  height: 15px;
+  margin: 0;
+  accent-color: #4f9cf9;
+}
+
 .result-item-date {
   color: #9aabc1;
   font-size: 10px;
+}
+
+.result-item-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.result-item-remove {
+  padding: 4px 0;
+  border: 0;
+  background: transparent;
+  color: #f07070;
+  cursor: pointer;
+  font-size: 10px;
+}
+
+.result-item-remove:hover {
+  color: #ffb0b0;
 }
 
 .result-item-name {
