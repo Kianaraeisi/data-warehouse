@@ -35,9 +35,14 @@ export function ProfilingSection({ form, onProfile }) {
         <option value="MultiPolygon">MultiPolygon</option>
       </select>
 
-      <button type="button" onClick={onProfile}>
-        Calculate BBox from File
-      </button>
+      <div className="bbox-actions">
+        <button type="button" onClick={onProfile}>
+          Calculate BBox from File
+        </button>
+        <button type="button" onClick={form.setTorinoBounds}>
+          Use Torino bounds
+        </button>
+      </div>
 
       <div className="bbox-grid">
         <div><span>West</span><strong>{form.bbox.xmin}</strong></div>

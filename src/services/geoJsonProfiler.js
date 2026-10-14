@@ -1,3 +1,5 @@
+import Papa from "papaparse";
+
 function getFeatures(geoJson) {
   if (geoJson?.type === "FeatureCollection" && Array.isArray(geoJson.features)) {
     return geoJson.features;
@@ -43,6 +45,24 @@ function collectCoordinates(geometry, coordinates) {
   }
 }
 
+function getBounds(coordinates) {
+  if (!coordinates.length) return null;
+
+  const bounds = coordinates.reduce(
+    (current, [longitude, latitude]) => ({
+      xmin: Math.min(current.xmin, longitude),
+      ymin: Math.min(current.ymin, latitude),
+      xmax: Math.max(current.xmax, longitude),
+      ymax: Math.max(current.ymax, latitude),
+    }),
+    { xmin: Infinity, ymin: Infinity, xmax: -Infinity, ymax: -Infinity }
+  );
+
+  return Object.fromEntries(
+    Object.entries(bounds).map(([key, value]) => [key, value.toFixed(6)])
+  );
+}
+
 export function profileGeoJson(geoJson) {
   const features = getFeatures(geoJson);
   const columns = new Set();
@@ -61,40 +81,97 @@ export function profileGeoJson(geoJson) {
     collectCoordinates(feature?.geometry, coordinates);
   });
 
-  const bounds = coordinates.reduce(
-    (current, [longitude, latitude]) => ({
-      xmin: Math.min(current.xmin, longitude),
-      ymin: Math.min(current.ymin, latitude),
-      xmax: Math.max(current.xmax, longitude),
-      ymax: Math.max(current.ymax, latitude),
-    }),
-    { xmin: Infinity, ymin: Infinity, xmax: -Infinity, ymax: -Infinity }
-  );
-
   return {
     featureCount: features.length,
     columnCount: columns.size,
     detectedColumns: Array.from(columns),
     geometryType,
-    bbox: coordinates.length
-      ? Object.fromEntries(
-          Object.entries(bounds).map(([key, value]) => [key, value.toFixed(6)])
-        )
-      : null,
+    bbox: getBounds(coordinates),
   };
 }
 
-export async function profileGeoJsonFile(file) {
+function normalizeColumnName(name) {
+  return name.toLowerCase().replace(/[^a-z0-9]/g, "");
+}
+
+export function profileCsv(csvText) {
+  const parsed = Papa.parse(csvText, {
+    header: true,
+    skipEmptyLines: true,
+    transformHeader: (header) => header.trim(),
+  });
+
+  if (parsed.errors.length) {
+    throw new Error(`Invalid CSV file: ${parsed.errors[0].message}`);
+  }
+
+  const columns = parsed.meta.fields || [];
+  if (!columns.length) throw new Error("The CSV file does not contain a header row.");
+
+  const rows = parsed.data.filter((row) =>
+    Object.values(row).some((value) => String(value ?? "").trim() !== "")
+  );
+  const geometryColumn = columns.find((column) =>
+    ["geometrygeojson", "geojson", "geometry"].includes(normalizeColumnName(column))
+  );
+  const geometryTypeColumn = columns.find(
+    (column) => normalizeColumnName(column) === "geometrytype"
+  );
+  const coordinates = [];
+  let geometryType = "";
+
+  rows.forEach((row, index) => {
+    const geometryValue = geometryColumn ? row[geometryColumn]?.trim() : "";
+    if (geometryValue) {
+      let geometry;
+      try {
+        geometry = JSON.parse(geometryValue);
+      } catch {
+        throw new Error(`Invalid geometry JSON in CSV row ${index + 2}.`);
+      }
+
+      if (geometry.type === "Feature") geometry = geometry.geometry;
+      if (geometry.type === "FeatureCollection") {
+        geometry.features?.forEach((feature) => {
+          if (!geometryType && feature.geometry?.type) {
+            geometryType = feature.geometry.type;
+          }
+          collectCoordinates(feature.geometry, coordinates);
+        });
+      } else {
+        if (!geometryType && geometry.type) geometryType = geometry.type;
+        collectCoordinates(geometry, coordinates);
+      }
+    }
+
+    if (!geometryType && geometryTypeColumn) {
+      geometryType = row[geometryTypeColumn]?.trim() || "";
+    }
+  });
+
+  return {
+    featureCount: rows.length,
+    columnCount: columns.length,
+    detectedColumns: columns,
+    geometryType,
+    bbox: getBounds(coordinates),
+  };
+}
+
+export async function profileDatasetFile(file) {
   if (!file) throw new Error("Please select a file first.");
 
   const extension = file.name?.split(".").pop()?.toLowerCase();
-  if (!extension || !["json", "geojson"].includes(extension)) {
-    throw new Error("Profiling is currently available only for GeoJSON files.");
+  if (!extension || !["json", "geojson", "csv"].includes(extension)) {
+    throw new Error("Profiling is currently available for GeoJSON and CSV files.");
   }
+
+  const fileText = await file.text();
+  if (extension === "csv") return profileCsv(fileText);
 
   let geoJson;
   try {
-    geoJson = JSON.parse(await file.text());
+    geoJson = JSON.parse(fileText);
   } catch {
     throw new Error("Invalid GeoJSON file.");
   }

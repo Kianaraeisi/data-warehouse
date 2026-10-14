@@ -1,8 +1,14 @@
 import { useState } from "react";
-import { profileGeoJsonFile } from "../services/geoJsonProfiler";
+import { profileDatasetFile } from "../services/geoJsonProfiler";
 import { registerDatasource } from "../services/uploadApi";
 
 const INITIAL_BBOX = { xmin: 0, ymin: 0, xmax: 0, ymax: 0 };
+const TORINO_BBOX = {
+  xmin: 7.577834,
+  ymin: 45.006792,
+  xmax: 7.773348,
+  ymax: 45.140218,
+};
 
 const FORMAT_BY_EXTENSION = {
   geojson: "GeoJSON",
@@ -58,7 +64,7 @@ export function useUploadForm(onSuccess) {
   const profileFile = async () => {
     setError(null);
     try {
-      const profile = await profileGeoJsonFile(file);
+      const profile = await profileDatasetFile(file);
       setFeatureCount(profile.featureCount);
       setColumnCount(profile.columnCount);
       setDetectedColumns(profile.detectedColumns);
@@ -70,6 +76,8 @@ export function useUploadForm(onSuccess) {
       throw profileError;
     }
   };
+
+  const setTorinoBounds = () => setBbox(TORINO_BBOX);
 
   const getSourceValidationError = () => {
     if (sourceType === "file" && !file) {
@@ -190,6 +198,7 @@ export function useUploadForm(onSuccess) {
     hasRequiredSourceInfo,
     validateStep,
     profileFile,
+    setTorinoBounds,
     submit,
   };
 }
